@@ -16,3 +16,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 ma = Marshmallow(app)
 db.init_app(app)
+
+
+from api.routes import it_college, ns_members
+

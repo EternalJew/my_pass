@@ -8,6 +8,8 @@ class NS_members(db.Model):
     last_name = db.Column(db.String(30), nullable=False)
     email = db.Column(db.String(30), unique=True, nullable=False)
     ns_unique_code = db.Column(db.String(40), unique=True, nullable=False)
+    type_id = db.Column(db.Integer, db.ForeignKey('ns_members_type.id'), nullable=False)
+    type = db.relationship('NS_Members_Type')
     registered = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __init__(self, first_name, last_name, email,  ns_unique_code):

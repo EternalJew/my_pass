@@ -1,12 +1,14 @@
 from api import db, ma, jsonify, Blueprint
 from flask_restful import abort, request
 from api.models.ns_members import NS_members
+from api.models.ns_members_type import NS_Members_Type
+from api.utils.get_id_from_db_object_for_relation import get_id
 
 main = Blueprint('ns_members_blueprint', __name__)
 
 class NsSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'first_name', 'last_name', 'email', 'ns_unique_code', 'registered')
+        fields = ('id', 'first_name', 'last_name', 'email', 'ns_unique_code', 'type_id', 'registered')
 
 
 ns_schema = NsSchema()
@@ -40,8 +42,10 @@ def add_ns_member():
     last_name = request.json['last_name']
     email = request.json['email']
     ns_unique_code = request.json['student']
+    type = request.json['type']
+    type_id = get_id(NS_Members_Type, type)
 
-    new_client = NS_members(first_name, last_name, email, ns_unique_code)
+    new_client = NS_members(first_name, last_name, email, ns_unique_code, type_id)
 
     db.session.add(new_client)
     db.session.commit()
@@ -51,20 +55,23 @@ def add_ns_member():
 
 @main.route('/ns_member/update/<id>', methods=['PUT'])
 def update_student(id):
-    result = NS_members.query.get(id)
+    member = NS_members.query.get(id)
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     ns_unique_code = request.json['student']
     email = request.json['email']
+    type = request.json['type']
+    type_id = get_id(NS_Members_Type, type)
 
-    result.first_name = first_name
-    result.last_name = last_name
-    result.email = email
-    result.ns_unique_code = ns_unique_code
+    member.first_name = first_name
+    member.last_name = last_name
+    member.email = email
+    member.ns_unique_code = ns_unique_code
+    member.type_id = type_id
 
     db.session.commit()
 
-    return ns_schema.jsonify(result)
+    return ns_schema.jsonify(member)
 
 
 @main.route('/ns_member/delete/<id>', methods=['DELETE'])
