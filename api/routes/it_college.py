@@ -1,10 +1,14 @@
 from api import db, ma, jsonify, Blueprint
-from flask_restful import abort, request
+from flask_restful import abort
 from api.models.it_college import IT_College_members
 from api.models.it_college_type import IT_College_Type
 from api.utils.get_id_from_db_object_for_relation import get_id
+from flask import flash, request
+from api.auth.forms import RegForm
+
 
 main = Blueprint('it_college_blueprint', __name__)
+
 
 class ItCollegeSchema(ma.Schema):
     class Meta:
@@ -36,26 +40,24 @@ def get_member(id):
     return jsonify(result)
 
 
-@main.route('/add', methods=['POST'])
+@main.route('/signup', methods=['GET', 'POST'])
 def add_member():
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    email = request.json['email']
-    unique_code = request.json['student']
-    type = request.json['type']
-    type_id = get_id(IT_College_Type, type)
-
-    new_member = IT_College_members(first_name, last_name, email, unique_code, type_id)
-
-    db.session.add(new_member)
-    db.session.commit()
-
-    return it_college_schema.jsonify(new_member)
+    form = RegForm(request.form)
+    if request.method == "POST" and form.validate():
+        new_college_member = IT_College_members(first_name=form.first_name.data,
+                                                last_name=form.last_name.data,
+                                                email=form.email.data,
+                                                unique_code=1,
+                                                type_id=get_id(IT_College_Type, form.name.data))
+        db.session.add(new_college_member)
+        db.session.commit()
+        flash("Account created for %s!" % (form.first_name.data), "success")
+    return it_college_schema.jsonify(new_college_member)
 
 
 @main.route('/update/<id>', methods=['PUT'])
 def update_member(id):
-    member = IT_College_members.query.get(id)
+    college_member = IT_College_members.query.get(id)
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     unique_code = request.json['student']
@@ -63,20 +65,20 @@ def update_member(id):
     type = request.json['type']
     type_id = get_id(IT_College_Type, type)
 
-    member.first_name = first_name
-    member.last_name = last_name
-    member.email = email
-    member.unique_code = unique_code
-    member.type_id = type_id
+    college_member.first_name = first_name
+    college_member.last_name = last_name
+    college_member.email = email
+    college_member.unique_code = unique_code
+    college_member.type_id = type_id
 
     db.session.commit()
 
-    return it_college_schema.jsonify(member)
+    return it_college_schema.jsonify(college_member)
 
 
 @main.route('/delete/<id>', methods=['DELETE'])
 def delete_member(id):
-    member = IT_College_members.query.get(id)
-    db.session.delete(member)
+    college_member = IT_College_members.query.get(id)
+    db.session.delete(college_member)
     db.session.commit()
-    return(member)
+    return(college_member)

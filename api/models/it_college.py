@@ -1,5 +1,6 @@
-from api import db, app
+from api import db
 from datetime import datetime
+
 
 class IT_College_members(db.Model):
     __tablename__ = 'it_college_members'

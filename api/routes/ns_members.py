@@ -6,6 +6,7 @@ from api.utils.get_id_from_db_object_for_relation import get_id
 
 main = Blueprint('ns_members_blueprint', __name__)
 
+
 class NsSchema(ma.Schema):
     class Meta:
         fields = ('id', 'first_name', 'last_name', 'email', 'ns_unique_code', 'type_id', 'registered')
